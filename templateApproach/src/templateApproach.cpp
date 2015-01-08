@@ -87,7 +87,7 @@ float detectAponeurosesAngle(const Mat& src)
 	            Point(lines[i][2], lines[i][3]), Scalar(0,0,255), 1, CV_AA);
 
 	        float lineMiddlePointY = (lines[i][1] + lines[i][3])/2;
-	        if( lineMiddlePointY > maxY)
+	        if( lineMiddlePointY > maxY && lineMiddlePointY < color_dst.rows/2)
 	        {
 	        	maxY = lineMiddlePointY;
 	        	bestApproxIdx = i;
@@ -267,7 +267,7 @@ int main(int argc, char** argv)
 		}
 	}
 
-
+//	apoAngle = 0.0;
 	// Correct for aponeuroses angle
 	angField = angField - apoAngle;
 
