@@ -225,11 +225,23 @@ void showAngleHisto(const cv::Mat& angleField)
 
 }
 
-int main()
+int main(int argc, char** argv)
 {
-	string path ="/home/tbergmueller/DEV/muscle/01_MuscularArchitecture/Muscle_VascusLateralis/GRANDER_2.bmp";
+
+	if(argc != 2)
+	{
+		cerr << "You have to call the program like 'program.exe <pathToImage>'" << endl;
+		return -1;
+	}
+	string path =argv[1];
 
 	Mat img = imread(path, CV_LOAD_IMAGE_GRAYSCALE);
+
+	if(img.empty())
+	{
+		cerr << "Could not load image from " << path << endl;
+		return -1;
+	}
 
 	Rect ultrasoundROI(258,130,694-258,515-130);
 
