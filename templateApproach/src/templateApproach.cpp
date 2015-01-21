@@ -11,6 +11,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
+#include "AponeurosesFinder.h"
 using namespace cv;
 
 using namespace std;
@@ -21,111 +22,6 @@ using namespace std;
 #define MAX_SEARCH_X	PROBE_WIDTH
 #define MAX_SEARCH_Y	PROBE_HEIGHT/2
 
-float detectAponeurosesAngle(const Mat& src)
-{
-	Mat dst, color_dst;
-
-
-	  //  Canny( src, dst, 200, 100, 7 );
-
-	adaptiveThreshold(src,dst,255,CV_ADAPTIVE_THRESH_GAUSSIAN_C, CV_THRESH_BINARY, 65,0);
-
-	int erosion_size=1;
-
-	 Mat element = getStructuringElement( MORPH_RECT,
-	                                       Size( 2*erosion_size + 1, 2*erosion_size+1 ),
-	                                       Point( erosion_size, erosion_size ) );
-
-
-	 erode(dst,dst,element);
-	 dilate(dst,dst,element);
-	 erode(dst,dst,element);
-	 dilate(dst,dst,element);
-	 erode(dst,dst,element);
-		 dilate(dst,dst,element);
-		 erode(dst,dst,element);
-			 dilate(dst,dst,element);
-
-
-
-
-
-
-	cvtColor( dst, color_dst, CV_GRAY2BGR );
-
-
-	float angle = 0.0;	// default value
-
-    //imshow("dst", dst);
-
-	#if 0
-	    vector<Vec2f> lines;
-	    HoughLines( dst, lines, 1, CV_PI/180, 100 );
-
-	    for( size_t i = 0; i < lines.size(); i++ )
-	    {
-	        float rho = lines[i][0];
-	        float theta = lines[i][1];
-	        double a = cos(theta), b = sin(theta);
-	        double x0 = a*rho, y0 = b*rho;
-	        Point pt1(cvRound(x0 + 1000*(-b)),
-	                  cvRound(y0 + 1000*(a)));
-	        Point pt2(cvRound(x0 - 1000*(-b)),
-	                  cvRound(y0 - 1000*(a)));
-	        line( color_dst, pt1, pt2, Scalar(0,0,255), 3, 8 );
-	    }
-	#else
-	    vector<Vec4i> lines;
-	    HoughLinesP( dst, lines, 1, CV_PI/180, 300, src.cols/2, 5 );
-
-	    float maxY = 0.0;
-	    int bestApproxIdx = -1;
-
-	    for( size_t i = 0; i < lines.size(); i++ )
-	    {
-	        line( color_dst, Point(lines[i][0], lines[i][1]),
-	            Point(lines[i][2], lines[i][3]), Scalar(0,0,255), 1, CV_AA);
-
-	        float lineMiddlePointY = (lines[i][1] + lines[i][3])/2;
-	        if( lineMiddlePointY > maxY && lineMiddlePointY < color_dst.rows/2)
-	        {
-	        	maxY = lineMiddlePointY;
-	        	bestApproxIdx = i;
-	        }
-	    }
-
-
-	    cout << "detected " << lines.size() << " aponeuroses candidates" << endl;
-
-
-	    line( color_dst, Point(lines[bestApproxIdx][0], lines[bestApproxIdx][1]),
-	    	            Point(lines[bestApproxIdx][2], lines[bestApproxIdx][3]), Scalar(0,255,0), 1, CV_AA);
-
-
-
-
-		float deltaX = lines[bestApproxIdx][2] - lines[bestApproxIdx][0];
-		float deltaY = lines[bestApproxIdx][3] - lines[bestApproxIdx][1];
-
-
-		angle=  atan2(deltaY, deltaX);
-
-
-
-	#endif
-	//    namedWindow( "Source", 1 );
-	//    imshow( "Source", src );
-
-	    namedWindow( "Detected Lines", 1 );
-	    imshow( "Detected Lines", color_dst );
-
-
-
-	    return angle;
-
-	    // Simple policy... select the line with the highest Y-Coordinate
-
-}
 
 
 float getAngleAtPosition(const Mat& ultraSound, const Point& probePoint)
@@ -179,7 +75,6 @@ float getAngleAtPosition(const Mat& ultraSound, const Point& probePoint)
 }
 
 
-
 void showAngleHisto(const cv::Mat& angleField)
 {
 	 // Quantize the hue to 30 levels
@@ -222,7 +117,6 @@ void showAngleHisto(const cv::Mat& angleField)
 
 	    namedWindow( "Angle Histogram", 1 );
 	    imshow( "Angle Histogram", histImg );
-
 }
 
 int main(int argc, char** argv)
@@ -248,11 +142,25 @@ int main(int argc, char** argv)
 	Mat ultraSound = img(ultrasoundROI);
 
 
-	float apoAngle = detectAponeurosesAngle(ultraSound);
+	// ########################################## Detect aponeuroses
+	AponeurosesFinder apoFinder;
+	apoFinder.findAponeuroses(ultraSound);
+
+
+	Mat apoImg;
+	cvtColor(ultraSound, apoImg, CV_GRAY2BGR);
+	apoFinder.drawCandidates(apoImg);
+	imshow("Possible Aponeuroses", apoImg);
+	waitKey();
+
+
+	float apoAngle = apoFinder.getAngle();
 	cout << "Aponeuroses angle is " << apoAngle << endl;
 	cout << "Detecting angle field (may take some time)..." << endl;
 
 
+	imshow("ultrasound", ultraSound);
+	waitKey();
 	int stepSize = 5;
 	Rect angleField(18,86,100/stepSize,100 / stepSize);
 	Mat angField(angleField.height,angleField.width,CV_32FC1);
