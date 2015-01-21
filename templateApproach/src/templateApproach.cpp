@@ -151,8 +151,6 @@ int main(int argc, char** argv)
 	cvtColor(ultraSound, apoImg, CV_GRAY2BGR);
 	apoFinder.drawCandidates(apoImg);
 	imshow("Possible Aponeuroses", apoImg);
-	waitKey();
-
 
 	float apoAngle = apoFinder.getAngle();
 	cout << "Aponeuroses angle is " << apoAngle << endl;
@@ -160,7 +158,9 @@ int main(int argc, char** argv)
 
 
 	imshow("ultrasound", ultraSound);
-	waitKey();
+	waitKey(10);
+
+
 	int stepSize = 5;
 	Rect angleField(18,86,100/stepSize,100 / stepSize);
 	Mat angField(angleField.height,angleField.width,CV_32FC1);

@@ -17,12 +17,16 @@
 using namespace std;
 using namespace cv;
 
+//#define MIN(X,Y) ((X) < (Y) ? : (X) : (Y))
+//#define MAX(X,Y) ((X) > (Y) ? : (X) : (Y))
 
 
 #define SLOPE_GROUPING_TOLERANCE	5.0	// Tolerance when grouping slopes together in Degrees
 
 
 #define MAX_APONEUROSES_ANGLE		10.0
+
+#define FASICLE_BORDER_PERCENTAGE	0.1
 
 
 /*********************************************
@@ -72,7 +76,6 @@ bool findAngleIdxWithTolerance(float angle, float angleToleranceRadiants, const 
 
 	return false; // not found
 }
-
 
 
 bool findDWithTolerance(float d, float dTolerance, const map<float, vector<Vec4i> >& groups, float* groupD)
@@ -249,36 +252,30 @@ void detectAponeuroses(const Mat& src, vector<AponeuroseCandidate>& candidates)
 
 
 
-	cvtColor( dst, color_dst, CV_GRAY2BGR );
-
-
 
 
 	    vector<Vec4i> lines;
 	    HoughLinesP( dst, lines, 1, CV_PI/180, 300, src.cols/2, 5 ); // FIXME: PARAMETRIZE
 
 
-	    // Draw all found lines
-	    for( size_t i = 0; i < lines.size(); i++ )
-	    {
-	        line( color_dst, Point(lines[i][0], lines[i][1]),
-	            Point(lines[i][2], lines[i][3]), Scalar(0,0,255), 1, CV_AA);
-	    }
-
 
 	    groupAponeurosesCandidates(src,lines,candidates);
 
 
 
-	    imshow("ApoCandidates", color_dst);
+
+	    // Draw all found lines
+	    /*
+	    cvtColor( dst, color_dst, CV_GRAY2BGR );
+	    for( size_t i = 0; i < lines.size(); i++ )
+	    {
+	        line( color_dst, Point(lines[i][0], lines[i][1]),
+	            Point(lines[i][2], lines[i][3]), Scalar(0,0,255), 1, CV_AA);
+	    }
+	    imshow("ApoLineFinder", color_dst);
+*/
 
 
-
-	//    namedWindow( "Source", 1 );
-	//    imshow( "Source", src );
-
-
-	    // Simple policy... select the line with the highest Y-Coordinate
 
 }
 
@@ -316,6 +313,11 @@ void AponeurosesFinder::drawCandidates(cv::Mat& colorMat)
 	{
 		_lowerApo->draw(colorMat, CV_RGB(255,0,0));
 	}
+
+	// Draw fasicleRegion
+
+	rectangle(colorMat, getFasicleRegion(colorMat),CV_RGB(255,0,0), 1, CV_AA);
+
 }
 
 /*
@@ -372,8 +374,37 @@ void AponeurosesFinder::selectLikeliest(const Mat& uSoundImg)
 */
 
 
+cv::Rect AponeurosesFinder::getFasicleRegion(const cv::Mat& ultrasonic) const
+{
+	assert(_upperApo != _candidates.end());
+
+	// Define startY
+	int startY = MAX(_upperApo->getY(0), _upperApo->getY(ultrasonic.cols));
 
 
+
+
+	int stopY;
+
+	if(_lowerApo == _candidates.end())
+	{
+		stopY = ultrasonic.rows;
+	}
+	else
+	{
+		stopY = MIN(_lowerApo->getY(0), _lowerApo->getY(ultrasonic.cols));
+	}
+	cout << "startY is " << startY << " and stopY is " << stopY << endl;
+
+
+	int width = ultrasonic.cols * (1-2*FASICLE_BORDER_PERCENTAGE);
+	int height = (stopY - startY)*(1-2*FASICLE_BORDER_PERCENTAGE);
+
+	Rect fasicleRegion( ultrasonic.cols * FASICLE_BORDER_PERCENTAGE, (FASICLE_BORDER_PERCENTAGE)*height + startY, width, height);
+
+	return fasicleRegion;
+
+}
 
 
 void AponeurosesFinder::selectLikeliest(const Mat& uSoundImg)
@@ -440,6 +471,9 @@ void AponeurosesFinder::selectLikeliest(const Mat& uSoundImg)
 		}
 	}
 }
+
+
+
 
 
 
