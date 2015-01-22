@@ -1,0 +1,5 @@
+*.aux
+*.bbl
+*.log
+*.blg
+paper/egpaper_for_review.synctex.gz
