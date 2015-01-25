@@ -1,23 +1,41 @@
 clear all;clc;
 
 % read in all images
-images = readInAllImages('Muscle_VascusLateralis/');
+images = readInAllImages('Muscle_VascusLateralis/')';
 
-% Groundtruth
-GT = [13.7; 16.07; 11.7; 12; 13.55; 11.6; 17.2; 10.63; 11.67; 16.5; 12.1; 13.35; 13.57; 19.5; 24.9; 13.5; 14.2; 13.75; 17.4; 18; 10.3; 12.2];
+% read in groundtruth
+GT = readInGroundTruth('GroundTruth/groundTruth.txt');
 
-angles = zeros(length(images),4);
-
-% find angles
+% check if GT and images order is consistent
 for i=1:length(images)
-    angle = findAngle(images(i).image,0);
-    %angles(i) = struct('id',images(i).id,'name',images(i).name,'angle',angle);
-    angles(i,1) = images(i).id;
-    angles(i,2) = angle;
-    angles(i,3) = GT(i);
-    angles(i,4) = abs(GT(i)-angle);
-    %ImageName = angles(i).name
-    %Angle = angles(i).angle
+    if( ~strcmp(GT{1}(i), images(i).name) )
+        i
+        error('Image order of cell array GT and struct images is not consistent!');
+    end
 end
 
-average_error = sum(angles(:,4))/length(images)
+% read in results from the template matching approach (from Thomas)
+results_template = dlmread('TestResults.csv', ';',1,1);
+% where lower aponeurosis was not found, take the upper one:
+index = find(results_template(:,1)==-666);
+results_template(index,1) = results_template(index,2);
+
+% find angles
+error = zeros(length(images),1);
+for i=1:length(images)
+    angle = findAngle(images(i),0);
+    images(i).angle_hough = angle;
+    images(i).angle_template = results_template(i,1);
+    images(i).gt = GT{2}(i);
+    error_hough(i,1) = abs(images(i).gt-images(i).angle_hough);
+    error_template(i,1) = abs(images(i).gt-images(i).angle_template);
+end
+
+% JUST TO MAKE THE AVERAGING FAIR, SINCE THE TEMPLATE APPROACH CANNOT FIND
+% THE APO FOR THIS IMAGE:
+error_template(6,1) = error_hough(6,1);
+
+average_error_hough = sum(error_hough(:,1))/length(images)
+average_error_template = sum(error_template(:,1))/length(images)
+
+error_both_approaches = [error_hough error_template];

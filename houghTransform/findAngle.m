@@ -1,17 +1,21 @@
-function [ angle ] = findAngle(image,plotting_option)
-%FINDANGLE Summary of this function goes here
-%   Detailed explanation goes here
+function [ angle ] = findAngle(images,plotting_option)
+% calculates the angle between the aponeurosis and the fibers via hough
+% transform
+% use plotting_option=1 for getting the result plotted
+%
 
-im = imcrop(image,[258 130 438 439]);
+% cropping image + convert to grayscale
+im = imcrop(images.image,[258 130 438 439]);
 img = rgb2gray(im);
 
 if plotting_option
-    figure; imshow(img);
+    close all; figure; imshow(img);title(images.name);
 end
 
-%img = imadjust(img,stretchlim(img),[]);
+% apply gamma correction in order to enhance white pixels/lines
 img = imadjust(img,stretchlim(img),[],2);
 
+ % convert image to binary image by thresholding
 img_bin = im2bw(img,0.3);
 %img_bin = edge(img,'canny');
 %img_bin = edge(img_bin,'canny');
@@ -55,6 +59,12 @@ for k = 1:length(lines)
 end
 
 aponeuroses_line = lines(1);
+% angles = 0;
+% for i=1:length(lines)
+%    angles = angles + lines(i).theta;
+% end
+% aponeuroses_angle = angles/length(lines);
+% aponeuroses_angle = lines(1).theta;
 
 % highlight the longest line segment
 if plotting_option
@@ -156,6 +166,8 @@ end
 
 theta_mean = mean(relevant_thetas);
 calculated_angle = abs(aponeuroses_line.theta - theta_mean);
+%calculated_angle = abs(aponeuroses_angle - theta_mean);
+
 
 
 angle = calculated_angle;
