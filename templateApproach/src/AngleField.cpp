@@ -11,8 +11,8 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <iostream>
 
-#define PROBE_WIDTH		50
-#define PROBE_HEIGHT	100
+#define PROBE_WIDTH		25
+#define PROBE_HEIGHT	2*PROBE_WIDTH
 
 #define MAX_SEARCH_X	PROBE_WIDTH
 #define MAX_SEARCH_Y	PROBE_WIDTH/2	// Maximum 45°
@@ -103,13 +103,14 @@ AngleField::~AngleField() {
 
 void AngleField::compute(const cv::Mat& ultraSound, cv::Rect& roi)
 {
+	_roi = roi;
 		// ok, latest point
 
-		int nrAnglesX = (roi.width - MAX_SEARCH_X) / _gridSize -1 ;
-		int nrAnglesY = (roi.height - MAX_SEARCH_Y) / _gridSize -1;
+	// FIXME: Somewhat inaccurate calculation of what's possible to compute Why the minuses...
+		int nrAnglesX = (roi.width - PROBE_WIDTH -MAX_SEARCH_X) / _gridSize ;
+		int nrAnglesY = (roi.height - PROBE_HEIGHT -MAX_SEARCH_Y) / _gridSize;
 
 		_angleField = Mat::zeros(nrAnglesY, nrAnglesX, CV_32FC1);
-
 
 		float nrOfComputations = _angleField.cols * _angleField.rows;
 
@@ -124,14 +125,14 @@ void AngleField::compute(const cv::Mat& ultraSound, cv::Rect& roi)
 
 				float angle = getAngleAtPosition(ultraSound, probePoint);
 
-				// cout << "Compute at " << probePoint <<  ": "<< angle << endl;
+				// cout <<
 
 				_angleField.at<float>(y,x) = angle;
 				nrCompleted++;
 
 				if(_verbose)
 				{
-					cout << "Progress: " << (float)(nrCompleted) / nrOfComputations * 100.0 << "%" << endl;
+					cout << "Compute at " << probePoint <<  ": "<< angle << "\tProgress: " << (float)(nrCompleted) / nrOfComputations * 100.0 << "%" << endl;
 				}
 
 			}
@@ -141,8 +142,26 @@ void AngleField::compute(const cv::Mat& ultraSound, cv::Rect& roi)
 
 }
 
-void AngleField::illustrate(cv::Mat& rgbUltraSound)
+void AngleField::illustrate(cv::Mat& rgbUltraSound) const
 {
+
+
+
+			for(int x=0; x<_angleField.cols; x++)
+			{
+				for(int y=0; y<_angleField.rows; y++)
+				{
+					Point probePoint(x*_gridSize + _roi.x, y*_gridSize + _roi.y);
+
+					circle(rgbUltraSound,probePoint,1,CV_RGB(0,0,255), CV_FILLED, CV_AA);
+
+					Point endPoint((x+1)*_gridSize, probePoint.y + _gridSize*tan(-_angleField.at<float>(y,x)));
+
+					line(rgbUltraSound, probePoint,endPoint, CV_RGB(0,0,255), 1, CV_AA);
+
+				}
+			}
+
 
 }
 
@@ -178,6 +197,19 @@ void AngleField::getAngleHistogram(cv::Mat& output) const
 		    output = Mat::zeros(scale, hbins, CV_8UC3);
 
 
+		    float maxVal = 0;
+
+		    for( int h = 0; h < hbins; h++ )
+		    {
+		    	float binVal = hist.at<float>(h,0);
+
+		    	if(binVal > maxVal)
+		    	{
+		    		maxVal = binVal;
+		    	}
+		    }
+
+
 
 		    for( int h = 0; h < hbins; h++ )
 		    {
@@ -186,7 +218,7 @@ void AngleField::getAngleHistogram(cv::Mat& output) const
 		    //	cout << "binVal is " << binVal << endl;
 
 		            rectangle( output, Point(h, 0),
-		                        Point( (h+1), scale*(1- (binVal / (_angleField.cols*_angleField.rows)))),
+		                        Point( (h+1), scale*(1- (binVal / (maxVal)))),
 		                        Scalar::all(255),
 		                        CV_FILLED );
 		    }

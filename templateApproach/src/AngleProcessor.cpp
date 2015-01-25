@@ -29,6 +29,8 @@ AngleProcessor::~AngleProcessor() {
 void AngleProcessor::showResults(const cv::Mat& ultraSound)
 {
 
+
+
 	// Allright, illustrate angleField
 
 
@@ -39,27 +41,74 @@ void AngleProcessor::showResults(const cv::Mat& ultraSound)
 	float meanFasicleAngle = _angleField.getMeanAngle();
 
 	_apoFinder.drawWithFasicleAngle(visual,meanFasicleAngle);
+	_angleField.illustrate(visual);
 
-	imshow("Visual", visual);
+	//imshow("Visual", visual);
 
+	Mat angleHisto;
+	_angleField.getAngleHistogram(angleHisto);
+
+	Mat text = Mat::zeros(150, angleHisto.cols, CV_8UC3);
 
 	float lApoAngle, uApoAngle;
 
+	int fontFace = FONT_HERSHEY_PLAIN;
+	double fontScale = 1.0;
+	int thickness = 1;
+
+
+	int lineHeight = 30;
+	int xOffset = 10;
+
+	cv::putText(text, "Angles to aponeuroses:" , Point(xOffset,lineHeight), fontFace, fontScale, CV_RGB(255,255,255), thickness, CV_AA);
+
+
 	if(_apoFinder.getLowerApoAngle(&lApoAngle))
 	{
-		cout <<  "Angle to lower Apo ("<< (lApoAngle*180/CV_PI)<<") is " << (-lApoAngle + meanFasicleAngle)*180/CV_PI << endl;
+
+
+	    stringstream ss;
+	    ss << "Lower A.: " << (-lApoAngle + meanFasicleAngle)*180/CV_PI << " deg";
+	    cv::putText(text, ss.str(), Point(2*xOffset,2*lineHeight), fontFace, fontScale, CV_RGB(255,0,0), thickness, CV_AA);
+
 
 	}
 
 	if(_apoFinder.getUpperApoAngle(&uApoAngle))
 	{
-		cout <<  "Angle to upper Apo is " << (-uApoAngle + meanFasicleAngle)*180/CV_PI << endl;
+		 stringstream ss;
+		ss << "Upper A.: " << (uApoAngle + meanFasicleAngle)*180/CV_PI << " deg";
+		cv::putText(text, ss.str(), Point(2*xOffset,3*lineHeight), fontFace, fontScale, CV_RGB(0,255,0), thickness, CV_AA);
+
 	}
 
 
-	Mat angleHisto;
-	_angleField.getAngleHistogram(angleHisto);
-    imshow( "Angle Histogram", angleHisto );
+    Mat resultImage = Mat::zeros(ultraSound.rows+20, 2*ultraSound.rows, CV_8UC3);
+
+    Rect uSroi(10,10,visual.cols, visual.rows);
+    Rect textROI(resultImage.cols - 10 - text.cols,resultImage.rows - 10 - text.rows,text.cols, text.rows);
+
+    Rect histROI(resultImage.cols - 10 - angleHisto.cols,10 ,angleHisto.cols, angleHisto.rows);
+
+    visual.copyTo(resultImage(uSroi));
+    rectangle(resultImage, uSroi, Scalar::all(255), 2, CV_AA);
+
+    text.copyTo(resultImage(textROI));
+    rectangle(resultImage, textROI, Scalar::all(255), 2, CV_AA);
+
+    angleHisto.copyTo(resultImage(histROI));
+    rectangle(resultImage, histROI, Scalar::all(255), 2, CV_AA);
+
+    imshow("Result", resultImage);
+
+
+
+
+
+
+
+
+
 
 
 }

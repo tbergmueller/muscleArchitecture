@@ -16,7 +16,7 @@ public:
 	virtual ~AngleField();
 
 	void compute(const cv::Mat& ultraSound, cv::Rect& roi);
-	void illustrate(cv::Mat& rgbUltraSound);
+	void illustrate(cv::Mat& rgbUltraSound) const;
 	float getMeanAngle() const;
 
 	void getAngleHistogram(cv::Mat& output) const;
@@ -24,6 +24,7 @@ public:
 private:
 	int _gridSize;
 	cv::Mat _angleField;
+	cv::Rect _roi;
 	bool _verbose;
 };
 

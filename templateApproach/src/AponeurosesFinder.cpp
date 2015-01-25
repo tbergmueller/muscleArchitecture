@@ -418,7 +418,7 @@ void AponeurosesFinder::selectLikeliest(const Mat& uSoundImg)
 	_lowerApo = _candidates.end();
 
 
-	int upperThird = uSoundImg.rows * 1/3;
+	int upperThird = uSoundImg.rows * 1/2;
 	int lowerThird = uSoundImg.rows * 1/2;
 
 

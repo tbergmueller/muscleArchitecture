@@ -58,16 +58,16 @@ int main(int argc, char** argv)
 	apoFinder.findAponeuroses(ultraSound);
 
 
-	Mat apoImg;
+	/*Mat apoImg;
 	cvtColor(ultraSound, apoImg, CV_GRAY2BGR);
 	apoFinder.drawCandidates(apoImg);
 	imshow("Possible Aponeuroses", apoImg);
+*/
 
 
 
 
-
-	AngleField af(5);
+	AngleField af(20);
 	Rect fasicleRegion = apoFinder.getFasicleRegion(ultraSound);
 	cout << "Computing Fasicle angle.. may take some time..." << endl;
 	af.compute(ultraSound,fasicleRegion);
