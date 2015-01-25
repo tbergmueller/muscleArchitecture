@@ -290,10 +290,67 @@ void AponeurosesFinder::findAponeuroses(const cv::Mat& ultrasonic)
 }
 
 
-float AponeurosesFinder::getAngle()
+bool AponeurosesFinder::getUpperApoAngle(float* angle) const
 {
-	assert(_upperApo != _candidates.end());
-	return _upperApo->getAngle();
+	if(_upperApo != _candidates.end())
+	{
+		*angle = _upperApo->getAngle();
+		return true;
+	}
+	return false;
+}
+
+bool AponeurosesFinder::getLowerApoAngle(float* angle) const
+{
+	if(_lowerApo != _candidates.end())
+		{
+			*angle = _lowerApo->getAngle();
+			return true;
+		}
+		return false;
+}
+
+
+void AponeurosesFinder::drawWithFasicleAngle(cv::Mat& colorMat, float fasicleAngle) const
+{
+
+	bool fasicleDrawn = false;
+
+	if(_lowerApo != _candidates.end())
+		{
+			_lowerApo->draw(colorMat, CV_RGB(255,0,0));
+
+			float x = (float)colorMat.cols-10;
+			float y = _lowerApo->getY(x);
+
+			float d = y - tan(fasicleAngle)*x;
+
+			Point start(0, d);
+			Point stop(colorMat.cols, colorMat.cols * tan(fasicleAngle) + d);
+
+			line(colorMat,start,stop,CV_RGB(255,0,0), 1, CV_AA);
+			fasicleDrawn = true;
+
+		}
+
+	if(_upperApo != _candidates.end())
+	{
+		_upperApo->draw(colorMat, CV_RGB(0,255,0));
+
+
+			float x = 10;
+			float y = _upperApo->getY(x);
+
+			float d = y - tan(fasicleAngle)*x;
+
+			Point start(0, d);
+			Point stop(colorMat.cols, colorMat.cols * tan(fasicleAngle) + d);
+
+			line(colorMat,start,stop,CV_RGB(0,255,0), 1, CV_AA);
+
+	}
+
+
 }
 
 
@@ -303,6 +360,7 @@ void AponeurosesFinder::drawCandidates(cv::Mat& colorMat)
 	{
 		it->draw(colorMat);
 	}
+
 
 	if(_upperApo != _candidates.end())
 	{
@@ -319,59 +377,6 @@ void AponeurosesFinder::drawCandidates(cv::Mat& colorMat)
 	rectangle(colorMat, getFasicleRegion(colorMat),CV_RGB(255,0,0), 1, CV_AA);
 
 }
-
-/*
-void AponeurosesFinder::selectLikeliest(const Mat& uSoundImg)
-{
-	_upperApo = _candidates.end();
-	_lowerApo = _candidates.end();
-
-
-	int middle = uSoundImg.rows / 2;
-
-	float middleX = uSoundImg.cols / 2;
-
-	for(vector<AponeuroseCandidate>::const_iterator it = _candidates.begin(); it != _candidates.end(); it++)
-	{
-		int yCandidate = it->getY(middleX);
-		int diff = yCandidate - middle;
-
-
-		if(diff < 0) // upper APO
-		{
-			if(_upperApo == _candidates.end())
-			{
-				_upperApo = it;
-			}
-			else
-			{
-				float yBefore = _upperApo->getY(middleX);
-
-				if(yCandidate > yBefore)
-				{
-					_upperApo = it;
-				}
-			}
-		}
-		else
-		{
-			if(_lowerApo == _candidates.end())
-			{
-				_lowerApo = it;
-			}
-			else
-			{
-				float yBefore = _lowerApo->getY(middleX);
-
-				if(yCandidate < yBefore)
-				{
-					_lowerApo = it;
-				}
-			}
-		}
-	}
-}
-*/
 
 
 cv::Rect AponeurosesFinder::getFasicleRegion(const cv::Mat& ultrasonic) const

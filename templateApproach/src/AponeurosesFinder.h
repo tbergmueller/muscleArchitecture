@@ -19,8 +19,12 @@ public:
 
 	void findAponeuroses(const cv::Mat& ultrasonic);
 
-	float getAngle();
+	bool getUpperApoAngle(float* angle) const;
+	bool getLowerApoAngle(float* angle) const;
+
 	void drawCandidates(cv::Mat& colorMat);
+
+	void drawWithFasicleAngle(cv::Mat& colorMat, float fasicleAngle) const;
 
 	/**
 	 * It is assumed the fasicles are over the whole width of the image

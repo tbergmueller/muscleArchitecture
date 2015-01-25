@@ -29,6 +29,7 @@ public:
 
 	float getAngle() const;
 
+
 private:
 	float _angle;
 	float _d;
