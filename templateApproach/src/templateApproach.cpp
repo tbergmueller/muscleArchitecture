@@ -137,7 +137,7 @@ int main(int argc, char** argv)
 		return -1;
 	}
 
-	Rect ultrasoundROI(258,130,694-258,515-130);
+	Rect ultrasoundROI(258,130,694-258,558-130);
 
 	Mat ultraSound = img(ultrasoundROI);
 
