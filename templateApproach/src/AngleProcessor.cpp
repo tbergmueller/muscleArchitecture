@@ -63,24 +63,42 @@ void AngleProcessor::showResults(const cv::Mat& ultraSound)
 	cv::putText(text, "Angles to aponeuroses:" , Point(xOffset,lineHeight), fontFace, fontScale, CV_RGB(255,255,255), thickness, CV_AA);
 
 
+
+	cout << "<results>";
+
 	if(_apoFinder.getLowerApoAngle(&lApoAngle))
 	{
 
 
 	    stringstream ss;
-	    ss << "Lower A.: " << (-lApoAngle + meanFasicleAngle)*180/CV_PI << " deg";
+
+	    float angleDegress = (-lApoAngle + meanFasicleAngle)*180/CV_PI;
+	    ss << "Lower A.: " <<  angleDegress<< " deg";
 	    cv::putText(text, ss.str(), Point(2*xOffset,2*lineHeight), fontFace, fontScale, CV_RGB(255,0,0), thickness, CV_AA);
 
+	    cout << "lower:" << angleDegress << ";";
 
+	}
+	else
+	{
+		 cout << "lower:" << -666 << ";";
 	}
 
 	if(_apoFinder.getUpperApoAngle(&uApoAngle))
 	{
 		 stringstream ss;
-		ss << "Upper A.: " << (uApoAngle + meanFasicleAngle)*180/CV_PI << " deg";
+		 float angleDegress = (uApoAngle + meanFasicleAngle)*180/CV_PI;
+		ss << "Upper A.: " << angleDegress << " deg";
 		cv::putText(text, ss.str(), Point(2*xOffset,3*lineHeight), fontFace, fontScale, CV_RGB(0,255,0), thickness, CV_AA);
 
+		 cout << "upper:" << angleDegress << ";";
 	}
+	else
+	{
+		 cout << "upper:" << -666 << ";";
+	}
+
+	cout << "</results>" << endl;
 
 
     Mat resultImage = Mat::zeros(ultraSound.rows+20, 2*ultraSound.rows, CV_8UC3);
