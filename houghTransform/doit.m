@@ -39,3 +39,7 @@ average_error_hough = sum(error_hough(:,1))/length(images)
 average_error_template = sum(error_template(:,1))/length(images)
 
 error_both_approaches = [error_hough error_template];
+
+plot(error_both_approaches,'x-');
+legend('Hough Transform','Template Matching');
+title('Error plot of both approaches');
