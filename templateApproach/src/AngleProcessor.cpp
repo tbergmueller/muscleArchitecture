@@ -26,7 +26,7 @@ AngleProcessor::~AngleProcessor() {
 	// TODO Auto-generated destructor stub
 }
 
-void AngleProcessor::showResults(const cv::Mat& ultraSound)
+void AngleProcessor::showResults(const cv::Mat& ultraSound, std::string storePath)
 {
 
 
@@ -118,6 +118,14 @@ void AngleProcessor::showResults(const cv::Mat& ultraSound)
     rectangle(resultImage, histROI, Scalar::all(255), 2, CV_AA);
 
     imshow("Result", resultImage);
+
+    if(storePath != "")
+    {
+    	if(!imwrite(storePath, resultImage))
+    	{
+    		cerr << "Could not write result to " << storePath << endl;
+    	}
+    }
 
 
 

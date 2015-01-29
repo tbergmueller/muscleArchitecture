@@ -33,9 +33,9 @@ void showAngleHisto(const cv::Mat& angleField)
 int main(int argc, char** argv)
 {
 
-	if(argc != 2)
+	if(argc < 2 || argc > 3)
 	{
-		cerr << "You have to call the program like 'program.exe <pathToImage>'" << endl;
+		cerr << "You have to call the program like 'program.exe <pathToImage> [<pathToStore>'" << endl;
 		return -1;
 	}
 	string path =argv[1];
@@ -75,12 +75,20 @@ int main(int argc, char** argv)
 	cout << "Done" << endl;
 
 
-
-
 	AngleProcessor processor(apoFinder, af);
 
-	processor.showResults(ultraSound);
 
+
+
+
+	if(argc == 3)
+	{
+		processor.showResults(ultraSound, argv[2]);
+	}
+	else
+	{
+		processor.showResults(ultraSound);
+	}
 
 
 

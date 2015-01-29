@@ -42,8 +42,8 @@ def makeLine(file, output):
     return line
 
 
-def runTest(executable, file):
-    process = Popen([executable, file], stdout=PIPE)
+def runTest(executable, file, resultFile):
+    process = Popen([executable, file, resultFile], stdout=PIPE)
     (output, err) = process.communicate()
     exit_code = process.wait()
 
@@ -62,6 +62,7 @@ def runTest(executable, file):
 
 
 imageDirectory="/home/tbergmueller/DEV/muscle/01_MuscularArchitecture/Muscle_VascusLateralis/"
+resultDirectory="/home/tbergmueller/DEV/muscle/results/"
 executable="Debug/templateApproach"
 
 files = os.listdir(imageDirectory)
@@ -70,11 +71,11 @@ files.sort()
 resultFile = "file;angleToLowerApo;angleToUpperApo\n"
 
 for f in files:
-    result = runTest(executable, imageDirectory + f)
+    result = runTest(executable, imageDirectory + f, resultDirectory + f)
    # print result
     resultFile += result + "\n"
 
-with open("TestResults.csv", "w") as text_file:
+with open(resultDirectory + "/TestResults.csv", "w") as text_file:
     text_file.write(resultFile)
 
 

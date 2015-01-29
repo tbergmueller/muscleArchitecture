@@ -15,7 +15,7 @@ class AngleProcessor {
 public:
 	AngleProcessor(const AponeurosesFinder& apoFinder, const AngleField& angleField);
 	virtual ~AngleProcessor();
-	void showResults(const cv::Mat& ultraSound);
+	void showResults(const cv::Mat& ultraSound, std::string storePath="");
 
 private:
 	const  AponeurosesFinder& _apoFinder;
