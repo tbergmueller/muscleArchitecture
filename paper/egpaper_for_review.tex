@@ -49,15 +49,15 @@ Fachhochschule Salzburg\\
 \thispagestyle{empty}
 
 %%%%%%%%% ABSTRACT
-\begin{abstract}
-   The ABSTRACT is to be in fully-justified italicized text, at the top
-   of the left-hand column, below the author and affiliation
-   information. Use the word ``Abstract'' as the title, in 12-point
-   Times, boldface type, centered relative to the column, initially
-   capitalized. The abstract is to be in 10-point, single-spaced type.
-   Leave two blank lines after the Abstract, then begin the main text.
-   Look at previous ICB abstracts to get a feel for style and length.
-\end{abstract}
+%\begin{abstract}
+%   The ABSTRACT is to be in fully-justified italicized text, at the top
+%   of the left-hand column, below the author and affiliation
+%   information. Use the word ``Abstract'' as the title, in 12-point
+%   Times, boldface type, centered relative to the column, initially
+%   capitalized. The abstract is to be in 10-point, single-spaced type.
+%   Leave two blank lines after the Abstract, then begin the main text.
+%   Look at previous ICB abstracts to get a feel for style and length.
+%\end{abstract}
 
 %%%%%%%%% BODY TEXT
 
@@ -94,7 +94,7 @@ For every image two or three different measurements of the angle exist, which pa
 For our implementation we calculated the mean angle of all measurements from one image and took this mean angle as a reference.
 
 \section{Proposed algorithms}
-We worked on two different algorithms in order to determine the angle. The first one is the Hough transform, which is a well-known algorithm for detecting lines in an image. The second one is based on template matching. ...Here, one patch is determined and shifted over the images, looking for matches...
+We worked on two different algorithms in order to determine the angle. The first one is the Hough transform, which is a well-known algorithm for detecting lines in an image. The second one is based on template matching.
 
 \subsection{Hough transform}
 The Hough transform is a well-known and established algorithm for detecting lines and other shapes in images. For the implementation, we used MATLAB R2013a and the inbuilt MATLAB function hough.
@@ -135,9 +135,79 @@ Figure \ref{fig:im1_hough_apo} shows the detected aponeurosis and \ref{fig:im1_h
 ...
 
 \section{Results}
-The average error/distance for all 22 images of both approaches: Hough transform: 2.48 degree. Template matching: 3.06 degree.
+The average error and distance to the groundtruth values for all 22 images of both approaches is as following: 
 
-Figure \ref{fig:errorPlot} shows the error plot of both algorithms.
+\begin{itemize}
+     \item \emph{Hough transform}: \textbf{2.48 degree}
+     \item \emph{Template matching}: \textbf{3.06 degree}
+\end{itemize}
+
+What has to be clearly considered, is the fact that the angles in the groundtruth are measured quite differently. So, if the groundtruth would have been constructed uniformly (with uniform ways of measuring the angle), we suppose that the results of our approaches would result in an even lower error.
+
+
+\subsection{Discussion of Hough transform results}
+
+With an average error of 2.48 degree the Hough transform performs overall really well and outperforms the template matching results. 
+However, improvements could be clearly done in the aponeurosis detection since in the most cases the detected aponeurosis is just a purely horizontal line which a user would in some cases clearly not agree with. An example of such a situation can be seen in Figure \ref{fig:im7_hough_apo}. Here, the left part of the aponeurosis is clearly not horizontal, although this is the case on the right part. However, the user would expect that the detected line is closer to the left part of the aponeurosis.
+The muscle fibers are giving in general really good results, so the strategy of taking 25 fiber candidates and average them in order to find the angle clearly pays off.
+
+\begin{figure}
+	\begin{center}		
+		\includegraphics[width=1\linewidth]{img/im7_hough_apo}
+	\end{center}
+	\caption{Detected aponeurosis of image 7.}
+	\label{fig:im7_hough_apo}
+	
+\end{figure}
+
+\subsection{Discussion of template matching results}
+
+...
+
+\subsection{Comparison of both approaches}
+
+Table \ref{tab:results} shows the groundtruth angles as well as the angles from both approaches for every single image.
+Figure \ref{fig:errorPlot} shows an error plot of both strategies. As it can be seen in the plot, both algorithms do not always agree on a low or high distance to the groundtruth. So for some images like images 5, 19 and 20 the Hough transform clearly beats the template matching approach where e.g. for images 7 and 14 the template matching result is clearly the better one.
+Image 15 is clearly the most challenging one and the corresponding groundtruth image (the image where the lines are drawn by hand from an expert user) is shown in Figure \ref{fig:im15_gt}. 
+The hand-drawn lines are looking correct, although it can be seen that the original muscle fibers have some curvature, so the hand-drawn three fiber lines can clearly not cover such a curvature and represent more the left part of the fibers.
+Figure \ref{fig:im15_hough_apo} and \ref{fig:im15_hough_fibers} are showing the Hough transform results and figure \ref{fig:im15_templ} the template matching results.
+Both approaches seem to detect the correct lines and angles when looking at the corresponding images. So at least, both strategies cannot be considered as completely faulty in this case and it might be the case that just the groundtruth angle is not correct or is too far away from the really "true" angle.
+
+\begin{figure}
+	\begin{center}		
+		\includegraphics[width=1\linewidth]{img/im15_gt}
+	\end{center}
+	\caption{Image 15 and the corresponding groundtruth lines.}
+	\label{fig:im15_gt}
+	
+\end{figure}
+
+\begin{figure}
+	\begin{center}		
+		\includegraphics[width=1\linewidth]{img/im15_hough_apo}
+	\end{center}
+	\caption{Image 15 and the detected aponeurosis from the Hough transform approach.}
+	\label{fig:im15_hough_apo}
+	
+\end{figure}
+
+\begin{figure}
+	\begin{center}		
+		\includegraphics[width=1\linewidth]{img/im15_hough_fibers}
+	\end{center}
+	\caption{Image 15 and the detected fiber candidates from the Hough transform approach.}
+	\label{fig:im15_hough_fibers}
+	
+\end{figure}
+
+\begin{figure}
+	\begin{center}		
+		\includegraphics[width=1\linewidth]{img/im15_templ}
+	\end{center}
+	\caption{Image 15 and the template matching result.}
+	\label{fig:im15_templ}
+	
+\end{figure}
 
 \begin{table}
 \begin{center}
@@ -181,14 +251,9 @@ Figure \ref{fig:errorPlot} shows the error plot of both algorithms.
 	
 \end{figure}
 
-\subsection{Weaknesses of Hough transform}
-
-\subsection{Weaknesses of template matching}
-
-\subsection{Comparison of both approaches}
 
 \section{Conclusion}
-There are images where the automatic angle calculation works well, but there are also images were it doesn't work so well...
+Both strategies gave good results when looking at the distances to the groundtruth angles. Clearly, with a bigger and more reliable groundtruth both algorithms could be even more optimized.
 
 {\small
 \bibliographystyle{ieee}
