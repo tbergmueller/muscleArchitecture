@@ -97,6 +97,7 @@ For our implementation we calculated the mean angle of all measurements from one
 We worked on two different algorithms in order to determine the angle. The first one is the Hough transform, which is a well-known algorithm for detecting lines in an image. The second one is based on template matching.
 
 \subsection{Hough transform}
+\label{sec:hough}
 The Hough transform is a well-known and established algorithm for detecting lines and other shapes in images. For the implementation, we used MATLAB R2013a and the inbuilt MATLAB function hough.
 This are the main steps of our implementation:
 
@@ -131,8 +132,8 @@ Figure \ref{fig:im1_hough_apo} shows the detected aponeurosis and \ref{fig:im1_h
 	
 \end{figure}
 
-\subsection{Template Matching}
-As a second approach we introduce a method based on template matching. In template matching anything that serves as a model can be used to compute the similarity to a second instance of this model \cite{Brunelli09a}. The basic idea behind our template approach is that we can obtain the fascicle angle by moving around probe regions of the original image in a local neighbourhood of the probe location. Because fascicles can be seen as straight lines, the similarity reaches a maximum for movements along that line. Hence, by detecting which specific movements result in maximum similarity between probe region and a sample-region of equal size within it's local neighbourhood, we are going to detect the fascicle angle.
+\subsection{Template Matching - a proof of concept}
+As a second approach we introduce a method based on template matching. In template matching anything that serves as a model can be used to compute the similarity to a second instance of this model \cite{Brunelli09a}. The basic idea behind our template approach is that we can obtain the fascicle angle by moving around probe regions of the original image in a local neighbourhood of the probe location. Because we assume fascicles can be seen as straight lines - at least locally - the similarity reaches a maximum for movements along that line. Hence, by detecting which specific movements result in maximum similarity between probe region and a sample-region of equal size within it's local neighbourhood, we are going to detect the fascicle angle.
 
 
 We take a rectangular sample region and compute similarity scores within a probe region. This process is illustrated in figure \ref{fig:templateApproach}. 
@@ -148,9 +149,6 @@ We take a rectangular sample region and compute similarity scores within a probe
 
 As a similarity score we employ the pixel-wise absolute difference between each pixel in the probe region and the corresponding pixels of a sub-region (same size as the probe region) within the sample region.
 
-In doing so, for each sample region a similarity score map is computed. Such sample similarity score maps are shown in figure \ref{fig:sampleAndSimScores}.  
-
-
 \begin{figure}
 	\begin{center}		
 		\includegraphics[width=0.09\linewidth]{img/sample}
@@ -160,10 +158,54 @@ In doing so, for each sample region a similarity score map is computed. Such sam
 		\includegraphics[width=0.2\linewidth]{img/diff3}
 		\includegraphics[width=0.2\linewidth]{img/diff4}
 	\end{center}
-	\caption{TODO}
+	\caption{Left the sample region (red in fig. \ref{fig:templateApproach}) is shown and to the right four similarity maps (green in fig. \ref{fig:templateApproach}) from different probe regions. In the similarity maps, black indicates high similarity, while white means no similarity at all. }
 	\label{fig:sampleAndSimScores}
+\end{figure}
+
+In doing so, for each sample region a similarity score map is computed. Such sample similarity score maps are shown in figure \ref{fig:sampleAndSimScores}. From the sample regions in figure \ref{fig:sampleAndSimScores} an intuitive proof of the template approach is seen. Especially the first and fourth similarity map have the highest similarities arranged in a straight line. This proofs the assumption that moving the sample region along a straight line in direction of the fascicles always results in maximum similarity. By finding the position of maximum similarity within the similarity maps, the fascicle angle can be computed. We define $P_{max}$ as the position of the maximum similarity within the similarity map, $P_P$ the upper left corner of a probe region with width $w_P$ and height $h_P$. The system is configured to have the upper left corner of the sample region $P_S$ at 
+\begin{equation}
+P_S=(P_{P_x}+\frac{1}{2}w_P, P_{P_y}).
+\end{equation}
+
+This works under the assumption that the fascicle orientation is always towards the lower right corner of the image, hence in increasing x- and y-direction\footnote{The origin is at the upper left corner of the image}. 
+
+Therefore, we can define a direction vector V that defines is parallel to the fascicles by using $P_max$ and $P_P$. By computing the angle of this vector we get the fascicle orientation $\phi_{P_P}$ at a probe location $P_P$ as
+
+\begin{equation}
+\phi_{P_P} = arctan(\frac{(P_{max_y} + P_{S_y}) - P_{S_y}}{(P_{max_x} + P_{S_x}) - P_{S_x}})
+\end{equation}
+
+Now, this fascicle orientation $\phi_{P_P}$ represents the local orientation around a probe point $P_P$. Because - as can be seen from the testing data - fascicles are not necessarily straight lines throughout the whole ultrasound image. To account for this, we compute a angle field, which is shown in blue in figure \ref{fig:angleField} by computing the local fascicle orientation for multiple probe points.
+
+\begin{figure}
+	\begin{center}		
+		\includegraphics[width=1\linewidth]{img/angleField}
+	\end{center}
+	\caption{The detected upper (thick green) and lower (thick red) aponeuroses as well as the angle field (blue). Furthermore, the thin red and green line represent the mean fascicle orientation $\overline{\phi_{P_P}}$ }
+	\label{fig:angleField}
 	
 \end{figure}
+
+As can be seen from figure \ref{fig:angleField}, there are sometimes false angles detected for certain probe points $P_P$. To limit the impact of such errors, the mean fascicle angle $\overline{\phi_{P_P}}$ over the angle field is computed by simply taking the arithmetic average of all local fascicle angles. The mean fascicle angle is illustrated in figure \ref{fig:angleField} as a thin red and green line.
+
+Finally, as described in section \ref{sec:hough}, the mean fascicle angle is related to the angle of upper (green) and lower (red) aponeuroses. Since we have no clear evidence which is the correct aponeuroses for this procedure, we decided to compute both relative fascicle angles and label them accordingly.  
+
+\subsection{A more elaborate method to find upper and lower aponeuroses}
+As described, Hough Lines are used for detection of the aponeuroses. In most of our testing data, two aponeuroses, subsequently denoted as upper- and lower aponeuroses, are pictured. Hence an algorithm has to be found to determine upper- and lower aponeuroses. We propose (considering the line equation $y = kx +d $):
+
+\begin{enumerate}
+	\item Find all possible candidates
+	\item Robustly group parallel lines according to $k \pm \Delta k$
+	\item For each $k$-group, group members to d-groups according to $d \pm \Delta d$.
+	\item Upper Aponeuroses: The mean line of the most-upper d-group.
+	\item Lower Aponeuroses: The mean line of the most-lower d-group  
+	\item Detection criteria: Upper Apo must be in upper third of the ultrasound image, lower Apo must be below centre line of the ultrasound image. 
+\end{enumerate}
+
+This works intuitively well, as evaluated experimentally with our 22 sample images. The lower aponeuroses is illustrated as a thick red line in figure \ref{fig:angleField} whereas the upper aponeuroses is ullustrated as a thick green line.
+
+
+
 
 
 \section{Results}
