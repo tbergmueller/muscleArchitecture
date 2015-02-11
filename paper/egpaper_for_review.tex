@@ -132,7 +132,39 @@ Figure \ref{fig:im1_hough_apo} shows the detected aponeurosis and \ref{fig:im1_h
 \end{figure}
 
 \subsection{Template Matching}
-...
+As a second approach we introduce a method based on template matching. In template matching anything that serves as a model can be used to compute the similarity to a second instance of this model \cite{Brunelli09a}. The basic idea behind our template approach is that we can obtain the fascicle angle by moving around probe regions of the original image in a local neighbourhood of the probe location. Because fascicles can be seen as straight lines, the similarity reaches a maximum for movements along that line. Hence, by detecting which specific movements result in maximum similarity between probe region and a sample-region of equal size within it's local neighbourhood, we are going to detect the fascicle angle.
+
+
+We take a rectangular sample region and compute similarity scores within a probe region. This process is illustrated in figure \ref{fig:templateApproach}. 
+
+\begin{figure}
+	\begin{center}		
+		\includegraphics[width=1\linewidth]{img/templateApproach}
+	\end{center}
+	\caption{In the template approach a rectangular sample region (red) is extracted from the image. Then the sample is moved around within the probe region (green) and for each possible position the similarity score is computed.}
+	\label{fig:templateApproach}
+	
+\end{figure}
+
+As a similarity score we employ the pixel-wise absolute difference between each pixel in the probe region and the corresponding pixels of a sub-region (same size as the probe region) within the sample region.
+
+In doing so, for each sample region a similarity score map is computed. Such sample similarity score maps are shown in figure \ref{fig:sampleAndSimScores}.  
+
+
+\begin{figure}
+	\begin{center}		
+		\includegraphics[width=0.09\linewidth]{img/sample}
+		\hspace{0.05\linewidth}
+		\includegraphics[width=0.2\linewidth]{img/diff1}
+		\includegraphics[width=0.2\linewidth]{img/diff2}
+		\includegraphics[width=0.2\linewidth]{img/diff3}
+		\includegraphics[width=0.2\linewidth]{img/diff4}
+	\end{center}
+	\caption{TODO}
+	\label{fig:sampleAndSimScores}
+	
+\end{figure}
+
 
 \section{Results}
 The average error and distance to the groundtruth values for all 22 images of both approaches is as following: 
