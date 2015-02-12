@@ -94,7 +94,7 @@ For every image two or three different measurements of the angle exist, which pa
 For our implementation we calculated the mean angle of all measurements from one image and took this mean angle as a reference.
 
 \section{Proposed algorithms}
-We worked on two different algorithms in order to determine the angle. The first one is the Hough transform, which is a well-known algorithm for detecting lines in an image. The second one is based on template matching.
+We worked on two different algorithms in order to determine the angle. The first one is the Hough transform, which is a well-known algorithm for detecting lines in an image \cite{c1962method}. The second one is based on template matching.
 
 \subsection{Hough transform}
 \label{sec:hough}
@@ -116,7 +116,7 @@ Figure \ref{fig:im1_hough_apo} shows the detected aponeurosis and \ref{fig:im1_h
 
 \begin{figure}
 	\begin{center}		
-		\includegraphics[width=1\linewidth]{img/im1_hough_apo}
+		\includegraphics[width=0.7\linewidth]{img/im1_hough_apo}
 	\end{center}
 	\caption{This image shows the detected aponeurosis (red line) of the hough transform approach.}
 	\label{fig:im1_hough_apo}
@@ -125,7 +125,7 @@ Figure \ref{fig:im1_hough_apo} shows the detected aponeurosis and \ref{fig:im1_h
 
 \begin{figure}
 	\begin{center}		
-		\includegraphics[width=1\linewidth]{img/im1_hough_fibers}
+		\includegraphics[width=0.7\linewidth]{img/im1_hough_fibers}
 	\end{center}
 	\caption{This image shows the 25 detected muscle fiber candidates from which the mean angle is taken.}
 	\label{fig:im1_hough_fibers}
@@ -140,7 +140,7 @@ We take a rectangular sample region and compute similarity scores within a probe
 
 \begin{figure}
 	\begin{center}		
-		\includegraphics[width=1\linewidth]{img/templateApproach}
+		\includegraphics[width=0.7\linewidth]{img/templateApproach}
 	\end{center}
 	\caption{In the template approach a rectangular sample region (red) is extracted from the image. Then the sample is moved around within the probe region (green) and for each possible position the similarity score is computed.}
 	\label{fig:templateApproach}
@@ -179,7 +179,7 @@ Now, this fascicle orientation $\phi_{P_P}$ represents the local orientation aro
 
 \begin{figure}
 	\begin{center}		
-		\includegraphics[width=1\linewidth]{img/angleField}
+		\includegraphics[width=0.7\linewidth]{img/angleField}
 	\end{center}
 	\caption{The detected upper (thick green) and lower (thick red) aponeuroses as well as the angle field (blue). Furthermore, the thin red and green line represent the mean fascicle orientation $\overline{\phi_{P_P}}$ }
 	\label{fig:angleField}
@@ -188,10 +188,11 @@ Now, this fascicle orientation $\phi_{P_P}$ represents the local orientation aro
 
 As can be seen from figure \ref{fig:angleField}, there are sometimes false angles detected for certain probe points $P_P$. To limit the impact of such errors, the mean fascicle angle $\overline{\phi_{P_P}}$ over the angle field is computed by simply taking the arithmetic average of all local fascicle angles. The mean fascicle angle is illustrated in figure \ref{fig:angleField} as a thin red and green line.
 
-Finally, as described in section \ref{sec:hough}, the mean fascicle angle is related to the angle of upper (green) and lower (red) aponeuroses. Since we have no clear evidence which is the correct aponeuroses for this procedure, we decided to compute both relative fascicle angles and label them accordingly.  
+Finally, as described in section \ref{sec:hough}, the mean fascicle angle is related to the angle of upper (green) and lower (red) aponeurosis. Since we have no clear evidence which is the correct aponeurosis for this procedure, we decided to compute both relative fascicle angles and label them accordingly.  
 
 \subsection{A more elaborate method to find upper and lower aponeuroses}
-As described, Hough Lines are used for detection of the aponeuroses. In most of our testing data, two aponeuroses, subsequently denoted as upper- and lower aponeuroses, are pictured. Hence an algorithm has to be found to determine upper- and lower aponeuroses. We propose (considering the line equation $y = kx +d $):
+\label{sec:apofinding}
+As described, Hough Lines are used for detection of the aponeuroses. In most of our testing data, two aponeuroses, subsequently denoted as upper- and lower aponeurosis, are pictured. Hence an algorithm has to be found to determine upper- and lower aponeuroses. We propose (considering the line equation $y = kx +d $):
 
 \begin{enumerate}
 	\item Find all possible candidates
@@ -199,7 +200,7 @@ As described, Hough Lines are used for detection of the aponeuroses. In most of 
 	\item For each $k$-group, group members to d-groups according to $d \pm \Delta d$.
 	\item Upper Aponeuroses: The mean line of the most-upper d-group.
 	\item Lower Aponeuroses: The mean line of the most-lower d-group  
-	\item Detection criteria: Upper Apo must be in upper third of the ultrasound image, lower Apo must be below centre line of the ultrasound image. 
+	\item Detection criteria: Upper Apo must be in upper half of the ultrasound image, lower Apo must be below the center line of the ultrasound image. 
 \end{enumerate}
 
 This works intuitively well, as evaluated experimentally with our 22 sample images. The lower aponeuroses is illustrated as a thick red line in figure \ref{fig:angleField} whereas the upper aponeuroses is ullustrated as a thick green line.
@@ -213,7 +214,7 @@ The average error and distance to the groundtruth values for all 22 images of bo
 
 \begin{itemize}
      \item \emph{Hough transform}: \textbf{2.48 degree}
-     \item \emph{Template matching}: \textbf{3.06 degree}
+     \item \emph{Template matching}: \textbf{2.75 degree}
 \end{itemize}
 
 What has to be clearly considered, is the fact that the angles in the groundtruth are measured quite differently. So, if the groundtruth would have been constructed uniformly (with uniform ways of measuring the angle), we suppose that the results of our approaches would result in an even lower error.
@@ -227,16 +228,29 @@ The muscle fibers are giving in general really good results, so the strategy of 
 
 \begin{figure}
 	\begin{center}		
-		\includegraphics[width=1\linewidth]{img/im7_hough_apo}
+		\includegraphics[width=0.45\linewidth]{img/im7_hough_apo}
+		\includegraphics[width=0.45\linewidth]{img/im7_apo_ela}
 	\end{center}
-	\caption{Detected aponeurosis of image 7.}
+	\caption{Detected aponeurosis of image 7 with the standard houghline-approach (left) vs. detected upper and lower aponeuroses (right) with the method described in section \ref{sec:apofinding}  .}
 	\label{fig:im7_hough_apo}
 	
 \end{figure}
 
 \subsection{Discussion of template matching results}
+In comparison to the hough transform approach, the template matching approach performs in average similar. However, when looking at individual results some remarks have to be made. It is still not clear whether the angle between lower- or upper aponeurosis is the measured angle in the ground truth. For rating (refer table \ref{tab:results}), in the template matching approach the angle to the lower aponeurosis is used (if available). If the lower aponeurosis can't be detected, the angle to the upper aponeursis is used. In some cases, as for instance shown for image 7 in figure \ref{fig:im7_hough_apo}, the template matching approach outperforms the hough-lines because of the more accurate aponeuroses detection. 
 
-...
+\begin{figure}
+	\begin{center}		
+		\includegraphics[width=\linewidth]{img/im2_resView_tm}
+		
+	\end{center}
+	\caption{Complete result view of image 2 examination with the template matching approach. To the left, the visualization of found features, to the right the histogram of local fascicle angles and the angle between mean fascicle angle and upper respectively lower aponeurosis.}
+	\label{fig:im2_results}
+\end{figure}
+
+The field of local fascicle angles shows significant variation in the angles, as pictured in the histogram of figure \ref{fig:im2_results}. This is mostly due to a absolute minimum detection for the probe region moving vector, which is by nature prone to noise. Furthermore, at the moment only a arithmetic mean over all local fascicle angles is used to come up with the mean fascicle orientation. As can be seen from the histogram in figure \ref{fig:im2_results} as well, there might be a bimodal histogram, where the mean angle lies somewhere were no angle has ever been detected. Here a more elaborate approach might be helpful as well.
+
+In general, there are several weaknesses due to only being proof-of-concept and no beta version implementation. These are listed in section \ref{sec:future}.
 
 \subsection{Comparison of both approaches}
 
@@ -249,39 +263,26 @@ Both approaches seem to detect the correct lines and angles when looking at the 
 
 \begin{figure}
 	\begin{center}		
-		\includegraphics[width=1\linewidth]{img/im15_gt}
+		\includegraphics[width=0.47\linewidth]{img/im15_gt}
+		\includegraphics[width=0.47\linewidth]{img/im15_hough_apo}
 	\end{center}
-	\caption{Image 15 and the corresponding groundtruth lines.}
+	\caption{Image 15 and the corresponding groundtruth lines (left) as well as the detected aponeurosis with the standard approach (right)}
 	\label{fig:im15_gt}
 	
 \end{figure}
 
-\begin{figure}
-	\begin{center}		
-		\includegraphics[width=1\linewidth]{img/im15_hough_apo}
-	\end{center}
-	\caption{Image 15 and the detected aponeurosis from the Hough transform approach.}
-	\label{fig:im15_hough_apo}
-	
-\end{figure}
+
 
 \begin{figure}
 	\begin{center}		
-		\includegraphics[width=1\linewidth]{img/im15_hough_fibers}
+		\includegraphics[width=0.47\linewidth]{img/im15_hough_fibers}
+		\includegraphics[width=0.47\linewidth]{img/im15_templ}
 	\end{center}
-	\caption{Image 15 and the detected fiber candidates from the Hough transform approach.}
-	\label{fig:im15_hough_fibers}
-	
+	\caption{Image 15 and the detected fiber candidates from the Hough transform approach (left). The results of the template matching approach are pictured right.}
+	\label{fig:im15_hough_fibers}	
 \end{figure}
 
-\begin{figure}
-	\begin{center}		
-		\includegraphics[width=1\linewidth]{img/im15_templ}
-	\end{center}
-	\caption{Image 15 and the template matching result.}
-	\label{fig:im15_templ}
-	
-\end{figure}
+
 
 \begin{table}
 \begin{center}
@@ -318,7 +319,7 @@ Both approaches seem to detect the correct lines and angles when looking at the 
 
 \begin{figure}
 	\begin{center}		
-		\includegraphics[width=1\linewidth]{img/errorPlot2}
+		\includegraphics[width=1\linewidth]{img/ErrorPlot2}
 	\end{center}
 	\caption{Error plot of both approaches.}
 	\label{fig:errorPlot}
@@ -328,6 +329,18 @@ Both approaches seem to detect the correct lines and angles when looking at the 
 
 \section{Conclusion}
 Both strategies gave good results when looking at the distances to the groundtruth angles. Clearly, with a bigger and more reliable groundtruth both algorithms could be even more optimized.
+
+\section{Future work}
+\label{sec:future}
+Especially for the template matching approach only a proof-of-concept has been brought. Therefore there's huge potential for improvement. We like to note the most promising one briefly:
+
+\begin{itemize}
+	\item Histogram approach to find mean fascicle orientation
+	\item Even the median might work better here
+	\item Do not only take the distance minimum to come up with the maximum similarity during template matching, but try line fitting approaches throughout the local fascicle angle maps.
+	\item Template matching is weak when there is no clear fascicle line visible in the image, that is when the probe region is either black or white or gray. This can be avoided by ruling out images with such characteristics. A good start would be using thresholding on standard deviation or mean gray values.
+\end{itemize}
+	
 
 {\small
 \bibliographystyle{ieee}

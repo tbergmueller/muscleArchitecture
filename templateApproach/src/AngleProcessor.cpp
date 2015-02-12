@@ -72,7 +72,7 @@ void AngleProcessor::showResults(const cv::Mat& ultraSound, std::string storePat
 
 	    stringstream ss;
 
-	    float angleDegress = (-lApoAngle + meanFasicleAngle)*180/CV_PI;
+	    float angleDegress = (fabs(lApoAngle) + fabs(meanFasicleAngle))*180/CV_PI;
 	    ss << "Lower A.: " <<  angleDegress<< " deg";
 	    cv::putText(text, ss.str(), Point(2*xOffset,2*lineHeight), fontFace, fontScale, CV_RGB(255,0,0), thickness, CV_AA);
 
@@ -87,7 +87,7 @@ void AngleProcessor::showResults(const cv::Mat& ultraSound, std::string storePat
 	if(_apoFinder.getUpperApoAngle(&uApoAngle))
 	{
 		 stringstream ss;
-		 float angleDegress = (uApoAngle + meanFasicleAngle)*180/CV_PI;
+		 float angleDegress = (fabs(uApoAngle) + fabs(meanFasicleAngle))*180/CV_PI;
 		ss << "Upper A.: " << angleDegress << " deg";
 		cv::putText(text, ss.str(), Point(2*xOffset,3*lineHeight), fontFace, fontScale, CV_RGB(0,255,0), thickness, CV_AA);
 

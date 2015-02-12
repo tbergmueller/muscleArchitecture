@@ -93,6 +93,6 @@ int main(int argc, char** argv)
 
 
 	//imshow("ultrasound", ultraSound);
-	waitKey(50);
+	waitKey(0);
 	return 0;
 }
