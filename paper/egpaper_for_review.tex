@@ -62,30 +62,30 @@ Fachhochschule Salzburg\\
 %%%%%%%%% BODY TEXT
 
 \section{Introduction}
-The main goal of this project was to write an algorithm which automatically calculates the angle between the aponeurosis and the muscle fibers of the Vastus Lateralis which is the muscle on the thigh right over the knee. This angle correlates with the constitution of the muscle.
+The main goal of this project was to write an algorithm which automatically calculates the angle between the aponeurosis and the fascicles of the Vastus Lateralis which is the muscle on the thigh right over the knee. This angle correlates with the constitution of the muscle.
 For this project we used ultrasound images.  
-Figure \ref{fig:VastusLateralis} shows the location of the Vastus Lateralis and an example ultrasound image in which both aponeuroses (lower and upper one) as well as the line is drawn which represents the muscle fibers (dashed line). Between this muscle fibers and the aponeurosis the angle should be calculated. In the most cases, the two aponeuroses are parallel, so there is no difference between taking the upper or lower one for the calculations. However, sometimes the two aponeuroses are not parallel and then, usually, the lower one is used. 
+Figure \ref{fig:VastusLateralis} shows the location of the Vastus Lateralis and an example ultrasound image in which both aponeuroses (lower and upper one) as well as the line is drawn which represents the fascicles (dashed line). Between this fibers and the aponeurosis the angle should be calculated. In the most cases, the two aponeuroses are parallel, so there is no difference between taking the upper or lower one for the calculations. However, sometimes the two aponeuroses are not parallel and then, usually, the lower one is used. 
 
 
 \begin{figure}
 	\begin{center}		
 		\includegraphics[width=1\linewidth]{img/VastusLateralis}
 	\end{center}
-	\caption{Vastus Lateralis (left) and an example ultrasound image in which both aponeuroses (lower and upper one) as well as the line is drawn which represents the muscle fibers (dashed line). \cite{NCronin13a}}
+	\caption{Vastus Lateralis (left) and an example ultrasound image in which both aponeuroses (lower and upper one) as well as the line is drawn which represents the fascicles (dashed line). \cite{NCronin13a}}
 	\label{fig:VastusLateralis}
 	
 \end{figure}
 
 Usually, this angle is calculated manually, by fitting lines to an ultrasound image on the computer and then calculate the angle by hand.
 
-The available groundtruth consists of 22 ultrasound images of the Vastus Lateralis from 12 different patients.
+The available ground truth consists of 22 ultrasound images of the Vastus Lateralis from 12 different patients.
 Figure \ref{fig:im1_orig} shows one original image of the dataset.
 
 \begin{figure}
 	\begin{center}		
 		\includegraphics[width=1\linewidth]{img/im1_original}
 	\end{center}
-	\caption{One original image of the dataset.}
+	\caption{Original image with ID 1 of the dataset.}
 	\label{fig:im1_orig}
 	
 \end{figure}
@@ -107,12 +107,12 @@ This are the main steps of our implementation:
      \item Hough transform applied directly on the binary image in order to detect the aponeurosis (the most prominent line)
      \item Canny edge detection on the binary image
      \item Hough transform on the edge image
-     \item Finally: Calculate the mean angle of all muscle fiber candidates and then determine the difference between the angle of the aponeurosis and the mean. This results in the final angle
+     \item Finally: Calculate the mean angle of all fascicle candidates and then determine the difference between the angle of the aponeurosis and that mean. This results in the final angle
 \end{enumerate}
 
-For detecting the aponeurosis (step 3) we also restricted the hough function to only search for lines which are nearly horizontal ( +/- 10 degree roughly). This increases the probability for finding the correct aponeurosis. In step 6, finding the muscle fiber candidates means that the 25 most prominent lines are used. Here, the angle is also restricted to the range from ~6 to ~30 degree since almost all muscle fibers in the groundtruth are in this range and lines with other angles are then clearly outliers. Furthermore, depending on the position of the aponeurosis (at the top or bottom), the fiber candidates have to clearly also lay below (detected aponeurosis is at the top) or above (apo. at bottom) the aponeurosis.
+For detecting the aponeurosis (step 3) we also restricted the hough function to only search for lines which are nearly horizontal ( +/- 10 degree roughly). This increases the probability for finding the correct aponeurosis. In step 6, finding the fascicle candidates means that the 25 most prominent lines are used. Here, the angle is also restricted to the range from ~6 to ~30 degree since almost all fascicles in the ground truth are in this range and lines with other angles are then clearly outliers. Furthermore, depending on the position of the aponeurosis (at the top or bottom), the fiber candidates have to clearly also lay below (detected aponeurosis is at the top) or above (apo. at bottom) the aponeurosis.
 
-Figure \ref{fig:im1_hough_apo} shows the detected aponeurosis and \ref{fig:im1_hough_fibers} shows the muscle fiber candidates on the image with ID 1 of the database.
+Figure \ref{fig:im1_hough_apo} shows the detected aponeurosis and \ref{fig:im1_hough_fibers} shows the fascicles candidates on the image with ID 1 from the database.
 
 \begin{figure}
 	\begin{center}		
@@ -127,7 +127,7 @@ Figure \ref{fig:im1_hough_apo} shows the detected aponeurosis and \ref{fig:im1_h
 	\begin{center}		
 		\includegraphics[width=0.7\linewidth]{img/im1_hough_fibers}
 	\end{center}
-	\caption{This image shows the 25 detected muscle fiber candidates from which the mean angle is taken.}
+	\caption{This image shows the 25 detected fascicle candidates from which the mean angle is taken.}
 	\label{fig:im1_hough_fibers}
 	
 \end{figure}
@@ -210,21 +210,23 @@ This works intuitively well, as evaluated experimentally with our 22 sample imag
 
 
 \section{Results}
-The average error and distance to the groundtruth values for all 22 images of both approaches is as following: 
+The average error and distance to the ground truth values of both approaches is as following: 
 
 \begin{itemize}
-     \item \emph{Hough transform}: \textbf{2.48 degree}
-     \item \emph{Template matching}: \textbf{2.75 degree}
+     \item \emph{Hough transform}: \textbf{2.37 degree}
+     \item \emph{Template matching}: \textbf{2.64 degree}
 \end{itemize}
 
-What has to be clearly considered, is the fact that the angles in the groundtruth are measured quite differently. So, if the groundtruth would have been constructed uniformly (with uniform ways of measuring the angle), we suppose that the results of our approaches would result in an even lower error.
+Note here, that the template matching approach could not find an aponeurosis for image 6, so the average values for both approaches is based on 21 instead of 22 total images.
+
+What has to be clearly considered, is the fact that the angles in the ground truth are measured quite differently. So, if the ground truth would have been constructed uniformly (with uniform ways of measuring the angle), we suppose that the results of our approaches would result in an even lower error.
 
 
 \subsection{Discussion of Hough transform results}
 
-With an average error of 2.48 degree the Hough transform performs overall really well and outperforms the template matching results. 
+With an average error of 2.37 degree the Hough transform algorithm performs overall really well and slightly performs better than the template matching approach. 
 However, improvements could be clearly done in the aponeurosis detection since in the most cases the detected aponeurosis is just a purely horizontal line which a user would in some cases clearly not agree with. An example of such a situation can be seen in Figure \ref{fig:im7_hough_apo}. Here, the left part of the aponeurosis is clearly not horizontal, although this is the case on the right part. However, the user would expect that the detected line is closer to the left part of the aponeurosis.
-The muscle fibers are giving in general really good results, so the strategy of taking 25 fiber candidates and average them in order to find the angle clearly pays off.
+The fascicles are giving in general really good results, so the strategy of taking 25 fiber candidates and average them in order to find the angle clearly pays off.
 
 \begin{figure}
 	\begin{center}		
@@ -254,19 +256,20 @@ In general, there are several weaknesses due to only being proof-of-concept and 
 
 \subsection{Comparison of both approaches}
 
-Table \ref{tab:results} shows the groundtruth angles as well as the angles from both approaches for every single image.
-Figure \ref{fig:errorPlot} shows an error plot of both strategies. As it can be seen in the plot, both algorithms do not always agree on a low or high distance to the groundtruth. So for some images like images 5, 19 and 20 the Hough transform clearly beats the template matching approach where e.g. for images 7 and 14 the template matching result is clearly the better one.
-Image 15 is clearly the most challenging one and the corresponding groundtruth image (the image where the lines are drawn by hand from an expert user) is shown in Figure \ref{fig:im15_gt}. 
-The hand-drawn lines are looking correct, although it can be seen that the original muscle fibers have some curvature, so the hand-drawn three fiber lines can clearly not cover such a curvature and represent more the left part of the fibers.
-Figure \ref{fig:im15_hough_apo} and \ref{fig:im15_hough_fibers} are showing the Hough transform results and figure \ref{fig:im15_templ} the template matching results.
-Both approaches seem to detect the correct lines and angles when looking at the corresponding images. So at least, both strategies cannot be considered as completely faulty in this case and it might be the case that just the groundtruth angle is not correct or is too far away from the really "true" angle.
+Table \ref{tab:results} shows the ground truth angles as well as the angles from both approaches for every single image.
+Figure \ref{fig:errorPlot} shows an error plot of both strategies. Note here again, as already mentioned above, that for image 6 no values are available for the template matching approach. Therefore, in the plot, a value of -1 was used for this image.
+As it can be seen in the plot, both algorithms do not always agree on a low or high distance to the ground truth. So for some images like images 5, 19 and 20 the Hough transform clearly beats the template matching approach where e.g. for images 7 and 14 the template matching result is clearly the better one.
+Image 15 is clearly the most challenging one and the corresponding ground truth image (the image where the lines are drawn by hand from an expert user) is shown in Figure \ref{fig:im15_gt} (left). 
+The hand-drawn lines are looking correct, although it can be seen that the original fascicles have some curvature, so the hand-drawn three fiber lines can clearly not cover such a curvature and represent more the left part of the fibers.
+Figure \ref{fig:im15_gt} (right) and \ref{fig:im15_hough_fibers} (left) are showing the Hough transform results and figure \ref{fig:im15_hough_fibers} (right) the template matching results.
+Both approaches seem to detect the correct lines and angles when looking at the corresponding images. So at least, both strategies cannot be considered as completely faulty in this case and it might be the case that just the ground truth angle is not correct or is too far away from the really "true" angle.
 
 \begin{figure}
 	\begin{center}		
 		\includegraphics[width=0.47\linewidth]{img/im15_gt}
 		\includegraphics[width=0.47\linewidth]{img/im15_hough_apo}
 	\end{center}
-	\caption{Image 15 and the corresponding groundtruth lines (left) as well as the detected aponeurosis with the standard approach (right)}
+	\caption{Image 15 and the corresponding ground truth lines (left) as well as the detected aponeurosis with the standard approach (right)}
 	\label{fig:im15_gt}
 	
 \end{figure}
@@ -292,22 +295,22 @@ Both approaches seem to detect the correct lines and angles when looking at the 
   1 & 13.73 & 12.82 & 18.43 \\ \hline
   2 & 16.07 & 13.39 & 17.24 \\ \hline
   3 & 11.70 & 13.34 & 10.56 \\ \hline
-  4 & 12.00 & 13.53 & 11.50 \\ \hline
+  4 & 12.00 & 13.53 & 13.38 \\ \hline
   5 & 13.55 & 10.64 & 7.10 \\ \hline
-  6 & 11.60 & 14 & -666 \\ \hline
+  6 & 11.60 & 14.00 & n.a. \\ \hline
   7 & 17.20 & 11.34 & 16.83 \\ \hline
   8 & 10.63 & 12.27 & 12.32 \\ \hline
   9 & 11.17 & 11.16 & 8.49 \\ \hline
-  10 & 16.47 & 10.86 & 11.19 \\ \hline
+  10 & 16.47 & 10.86 & 15.23 \\ \hline
   11 & 12.10 & 11.93 & 15.12 \\ \hline
   12 & 13.35 & 13.56 & 11.90 \\ \hline
   13 & 13.57 & 15.09 & 11.65 \\ \hline
   14 & 19.50 & 14.67 & 20.56 \\ \hline
-  15 & 24.90 & 14.57 & 17.35 \\ \hline
-  16 & 13.23 & 12.87 & 9.59 \\ \hline
-  17 & 14.20 & 12.57 & 12.90 \\ \hline
-  18 & 13.75 & 12.66 & 9.03 \\ \hline
-  19 & 17.30 & 13.83 & 9.42 \\ \hline
+  15 & 24.90 & 14.57 & 17.36 \\ \hline
+  16 & 13.23 & 12.87 & 10.09 \\ \hline
+  17 & 14.20 & 12.57 & 13.64 \\ \hline
+  18 & 13.75 & 12.66 & 10.19 \\ \hline
+  19 & 17.30 & 13.83 & 10.62 \\ \hline
   20 & 17.97 & 14.66 & 11.63 \\ \hline
   21 & 10.37 & 11.73 & 9.51 \\ \hline
   22 & 12.30 & 11.19 & 13.49 \\ \hline
@@ -319,7 +322,7 @@ Both approaches seem to detect the correct lines and angles when looking at the 
 
 \begin{figure}
 	\begin{center}		
-		\includegraphics[width=1\linewidth]{img/ErrorPlot2}
+		\includegraphics[width=1\linewidth]{img/ErrorPlotFinal}
 	\end{center}
 	\caption{Error plot of both approaches.}
 	\label{fig:errorPlot}
@@ -328,7 +331,7 @@ Both approaches seem to detect the correct lines and angles when looking at the 
 
 
 \section{Conclusion}
-Both strategies gave good results when looking at the distances to the groundtruth angles. Clearly, with a bigger and more reliable groundtruth both algorithms could be even more optimized.
+Both strategies gave good results when looking at the distances to the ground truth angles. Clearly, with a bigger and more uniform calculated ground truth  both algorithms could be even more optimized.
 
 \section{Future work}
 \label{sec:future}
@@ -340,7 +343,8 @@ Especially for the template matching approach only a proof-of-concept has been b
 	\item Do not only take the distance minimum to come up with the maximum similarity during template matching, but try line fitting approaches throughout the local fascicle angle maps.
 	\item Template matching is weak when there is no clear fascicle line visible in the image, that is when the probe region is either black or white or gray. This can be avoided by ruling out images with such characteristics. A good start would be using thresholding on standard deviation or mean gray values.
 \end{itemize}
-	
+
+Clearly, the weak point of the hough transform strategy is the aponeurosis detection and for template matching it is the angle calculation of the fascicles. So as a next step, both approaches could be combined using the reliable aponeurosis detection from template matching and the fascicles angle calculation from the Hough algorithm.
 
 {\small
 \bibliographystyle{ieee}
